@@ -1,39 +1,92 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProfileDto } from './dto/create-profile.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
-import { Profile } from './entities/profile.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';  
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    @InjectRepository(Profile)
-    private readonly profileRepository: Repository<Profile>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
-  async follow(username: string) {
-    const { profile } = await this.findOne(username);
+  async follow(followerId:string,username: string) {
+    const userToFollow =  await this.userRepository.findOne({ 
+      where: { username }, 
+      relations:{followers:true,following:true}
+  })
+    
+    if(!userToFollow){
+      throw new NotFoundException('User not found')
+    }
 
-    profile.following = true;
+    const currentUser = await this.userRepository.findOne({ 
+      where: { id:followerId },
+      relations:{followers:true,following:true}
+  })
 
-    return profile;
+    const isFollowing = userToFollow.followers.some(user => user.id === followerId)
+
+    if(!isFollowing){
+      userToFollow.followers.push(currentUser);
+      await this.userRepository.save(userToFollow);
+    }
+
+    return {
+      username:userToFollow.username,
+      bio:userToFollow.bio,
+      image:userToFollow.image,
+      following:true
+    };
   }
 
-  findAll() {
-    return `This action returns all profile`;
-  }
-
-  async findOne(username: string) {
-    const profile = await this.profileRepository.findOne({
+  async unFollow(followerId:string,username: string) {
+    const userToFollow =  await this.userRepository.findOne({ 
       where: { username },
+      relations:{followers:true,following:true}
+  })
+    
+    if(!userToFollow){
+      throw new NotFoundException('User not found')
+    }
+
+    const isFollowing = userToFollow.followers.some(user => user.id === followerId)
+
+    if(isFollowing){
+      userToFollow.followers = userToFollow.followers.filter(user => user.id !== followerId);
+      await this.userRepository.save(userToFollow);
+    }
+
+    return {
+      username:userToFollow.username,
+      bio:userToFollow.bio,
+      image:userToFollow.image,
+      following:false
+    };
+  }
+
+  async findOne(username: string, currentUserId:string) {
+    const profile = await this.userRepository.findOne({
+      where: { username },
+      relations:{followers:true,following:true}
     });
 
     if (!profile) {
       throw new NotFoundException('profile not found');
     }
-
-    return { profile };
+    console.log('currusrId',currentUserId)
+    const isFollowing = profile.followers.some(follower => follower.id === currentUserId);
+    console.log(profile)
+    return { 
+      profile:{
+          username:profile.username,
+          bio:profile.bio,
+          image:profile.image,
+          following:isFollowing
+      } 
+    };
   }
 
   update(id: number, updateProfileDto: UpdateProfileDto) {

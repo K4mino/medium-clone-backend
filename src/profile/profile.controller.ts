@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -10,18 +10,16 @@ export class ProfileController {
 
   @UseGuards(AuthGuard)
   @Post('/:username/follow')
-  follow(@Param('username') username: string) {
-    return this.profileService.follow(username);
+  async follow(@Param('username') username: string,@Request() req) {
+    const followerId = req.user.id
+    return await this.profileService.follow(followerId,username);
   }
 
-  @Get()
-  findAll() {
-    return this.profileService.findAll();
-  }
-
+  @UseGuards(AuthGuard)
   @Get(':username')
-  findOne(@Param('username') username: string) {
-    return this.profileService.findOne(username);
+  findOne(@Param('username') username: string,@Request() req) {
+    const currentUserId = req.user.id
+    return this.profileService.findOne(username, currentUserId);
   }
 
   @Patch(':id')
@@ -29,8 +27,9 @@ export class ProfileController {
     return this.profileService.update(+id, updateProfileDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.profileService.remove(+id);
+  @Delete('/:username/follow')
+  async unFollow(@Param('username') username: string,@Request() req) {
+    const followerId = req.user.id
+    return await this.profileService.unFollow(followerId,username);
   }
 }

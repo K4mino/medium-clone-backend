@@ -17,29 +17,31 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Request } from '@nestjs/common';
 import { User } from './entities/user.entity';
+import { LoginDto } from './dto/login-user.dto';
 
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UsePipes(new ValidationPipe())
-  @Post()
+  @Post('/users')
   signup(@Body() createUserDto: CreateUserDto) {
     return this.usersService.signUp(createUserDto);
   }
 
-  @Post('/login')
-  login(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.login(createUserDto);
+  @UsePipes(new ValidationPipe())
+  @Post('/users/login')
+  login(@Body() loginDto: LoginDto) {
+    return this.usersService.login(loginDto);
   }
 
-  @Get('users')
+  @Get('/users')
   findAll() {
     return this.usersService.findAll();
   }
 
   @UseGuards(AuthGuard)
-  @Get('user')
+  @Get('/user')
   async getCurrentUSer(@Request() req): Promise<User> {
     const authUser = req.user;
     const { user } = await this.usersService.findByEmail(authUser.email);
@@ -47,13 +49,9 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard)
-  @Put()
+  @Put('/user')
   update(@Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
-  }
 }

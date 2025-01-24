@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Profile } from 'src/profile/entities/profile.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToMany, JoinTable  } from 'typeorm';
 
 @Entity()
 export class User {
@@ -10,8 +11,15 @@ export class User {
   email: string;
   @Column('text')
   password: string;
-  @Column()
+  @Column({ nullable: true })
   image: string;
-  @Column()
+  @Column({ nullable: true })
   bio: string;
+
+  @ManyToMany(() => User, user => user.followers)
+  @JoinTable()
+  following:User[]
+
+  @ManyToMany(() => User, user=>user.following)
+  followers:User[]
 }

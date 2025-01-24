@@ -28,7 +28,7 @@ export class UsersService {
     if (IsEmailInUse) {
       throw new ConflictException('this Email already in use');
     }
-
+    console.log(createUserDto)
     const newUser = this.userRepository.create({
       id: uuid(),
       username: createUserDto.username,
@@ -75,7 +75,7 @@ export class UsersService {
   }
 
   findAll() {
-    return `This action returns all users`;
+    return this.userRepository.find();
   }
 
   async findOne(id: string) {
@@ -120,7 +120,17 @@ export class UsersService {
     return userWithoutPassword;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async findByUsername(username: string) {
+    return this.userRepository.findOne({ 
+        where: { username }, 
+        relations: ['followers'] 
+    });
+  }
+
+  async findOneWithFollowers(id: string) {
+    return this.userRepository.findOne({ 
+        where: { id }, 
+        relations: ['following'] 
+    });
   }
 }

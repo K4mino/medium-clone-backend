@@ -1,7 +1,10 @@
-import { Column, Entity } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Profile {
+  @PrimaryGeneratedColumn('uuid')
+  id:string
   @Column()
   username: string;
   @Column()
@@ -10,4 +13,5 @@ export class Profile {
   image: string;
   @Column()
   following: boolean;
+
 }
