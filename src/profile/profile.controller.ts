@@ -6,7 +6,8 @@ import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('profiles')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(
+    private readonly profileService: ProfileService) {}
 
   @UseGuards(AuthGuard)
   @Post('/:username/follow')
@@ -17,16 +18,16 @@ export class ProfileController {
 
   @UseGuards(AuthGuard)
   @Get(':username')
-  findOne(@Param('username') username: string,@Request() req) {
+  async findOne(@Param('username') username: string,@Request() req) {
     const currentUserId = req.user.id
-    return this.profileService.findOne(username, currentUserId);
+    return await this.profileService.findOne(username, currentUserId);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
     return this.profileService.update(+id, updateProfileDto);
   }
-
+  @UseGuards(AuthGuard)
   @Delete('/:username/follow')
   async unFollow(@Param('username') username: string,@Request() req) {
     const followerId = req.user.id

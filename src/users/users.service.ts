@@ -28,13 +28,15 @@ export class UsersService {
     if (IsEmailInUse) {
       throw new ConflictException('this Email already in use');
     }
-    console.log(createUserDto)
+    
     const newUser = this.userRepository.create({
       id: uuid(),
       username: createUserDto.username,
       email: createUserDto.email,
       password: await bcrypt.hash(createUserDto.password, 10),
     });
+
+    
 
     const user = await this.userRepository.save(newUser);
 
@@ -60,7 +62,7 @@ export class UsersService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const payload = { sub: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email };
     const { password, ...userWithoutPassword } = user;
     const access_token = await this.jwtService.signAsync(payload);
     const refresh_token = await this.jwtService.signAsync(payload, {
