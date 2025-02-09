@@ -10,6 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { ProfileModule } from './profile/profile.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ProfileModule } from './profile/profile.module';
     }),
     TypeOrmModule.forFeature([User]),
     ProfileModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

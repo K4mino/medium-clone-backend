@@ -36,8 +36,6 @@ export class UsersService {
       password: await bcrypt.hash(createUserDto.password, 10),
     });
 
-    
-
     const user = await this.userRepository.save(newUser);
 
     const token = await this.jwtService.signAsync({
@@ -82,15 +80,17 @@ export class UsersService {
 
   async findOne(id: string) {
     const user = await this.userRepository.findOne({
-      select: ['id', 'username', 'email'],
       where: { id },
     });
 
-    if (user) {
-      return { user };
+
+    if (!user) {
+      throw NotFoundException;
     }
 
-    throw NotFoundException;
+    delete user.password;
+      return { user };
+    
   }
 
   async findByEmail(email: string) {
@@ -122,17 +122,4 @@ export class UsersService {
     return userWithoutPassword;
   }
 
-  async findByUsername(username: string) {
-    return this.userRepository.findOne({ 
-        where: { username }, 
-        relations: ['followers'] 
-    });
-  }
-
-  async findOneWithFollowers(id: string) {
-    return this.userRepository.findOne({ 
-        where: { id }, 
-        relations: ['following'] 
-    });
-  }
 }

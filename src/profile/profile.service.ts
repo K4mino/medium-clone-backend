@@ -76,9 +76,9 @@ export class ProfileService {
     if (!profile) {
       throw new NotFoundException('profile not found');
     }
-    console.log('currusrId',currentUserId)
+   
     const isFollowing = profile.followers.some(follower => follower.id === currentUserId);
-    console.log(profile)
+ 
     return { 
       profile:{
           username:profile.username,
@@ -86,6 +86,7 @@ export class ProfileService {
           image:profile.image,
           following:isFollowing
       } 
+
     };
   }
 
